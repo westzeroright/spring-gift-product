@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>카카오 선물하기</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <style>
+    #productForm {
+      display: none;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-header">
+      <h2>Manage <strong>Products</strong></h2>
+    </div>
+    <div class="card-body">
+      <button class="btn btn-danger mb-3" id="deleteSelectedBtn">Delete</button>
+      <button class="btn btn-success mb-3" id="addProductBtn">Add New Product</button>
+
+      <form id="productForm">
+        <div class="form-group">
+          <label for="productName">Name</label>
+          <input type="text" class="form-control" id="productName" placeholder="Enter product name">
+        </div>
+        <div class="form-group">
+          <label for="productPrice">Price</label>
+          <input type="text" class="form-control" id="productPrice" placeholder="Enter product price">
+        </div>
+        <div class="form-group">
+          <label for="productUrl">URL</label>
+          <input type="text" class="form-control" id="productUrl" placeholder="Enter product URL">
+        </div>
+        <input type="hidden" id="editIndex">
+        <button type="button" class="btn btn-primary" id="saveProductBtn">Save Product</button>
+      </form>
+
+      <table class="table table-bordered mt-4">
+        <thead>
+        <tr>
+          <th><input type="checkbox" id="selectAll"></th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>URL</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="productTableBody">
+        <!-- Dynamic rows will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('addProductBtn').addEventListener('click', function() {
+    document.getElementById('productForm').style.display = 'block';
+    document.getElementById('editIndex').value = '';
+  });
+
+  document.getElementById('saveProductBtn').addEventListener('click', function() {
+    const productName = document.getElementById('productName').value;
+    const productPrice = document.getElementById('productPrice').value;
+    const productUrl = document.getElementById('productUrl').value;
+    const editIndex = document.getElementById('editIndex').value;
+
+    if (editIndex === '') {
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td><input type="checkbox" class="productCheckbox"></td>
+        <td>${productName}</td>
+        <td>${productPrice}</td>
+        <td>${productUrl}</td>
+        <td>
+          <button class="btn btn-warning btn-edit">Edit</button>
+          <button class="btn btn-danger btn-delete">Delete</button>
+        </td>
+      `;
+      document.getElementById('productTableBody').appendChild(newRow);
+    } else {
+      const row = document.getElementById('productTableBody').children[editIndex];
+      row.children[1].innerText = productName;
+      row.children[2].innerText = productPrice;
+      row.children[3].innerText = productUrl;
+    }
+
+    document.getElementById('productName').value = '';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('productUrl').value = '';
+    document.getElementById('productForm').style.display = 'none';
+
+    // Attach edit and delete event listeners
+    attachEventListeners();
+  });
+
+  document.getElementById('deleteSelectedBtn').addEventListener('click', function() {
+    const checkboxes = document.querySelectorAll('.productCheckbox');
+    checkboxes.forEach(function(checkbox) {
+      if (checkbox.checked) {
+        checkbox.closest('tr').remove();
+      }
+    });
+  });
+
+  document.getElementById('selectAll').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.productCheckbox');
+    checkboxes.forEach(function(checkbox) {
+      checkbox.checked = document.getElementById('selectAll').checked;
+    });
+  });
+
+  function attachEventListeners() {
+    document.querySelectorAll('.btn-edit').forEach(function(button, index) {
+      button.addEventListener('click', function() {
+        const row = button.closest('tr');
+        document.getElementById('productName').value = row.children[1].innerText;
+        document.getElementById('productPrice').value = row.children[2].innerText;
+        document.getElementById('productUrl').value = row.children[3].innerText;
+        document.getElementById('editIndex').value = index;
+        document.getElementById('productForm').style.display = 'block';
+      });
+    });
+
+    document.querySelectorAll('.btn-delete').forEach(function(button) {
+      button.addEventListener('click', function() {
+        button.closest('tr').remove();
+      });
+    });
+  }
+
+  // Initial attach of event listeners
+  attachEventListeners();
+</script>
+</body>
+</html>
