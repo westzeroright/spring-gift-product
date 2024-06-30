@@ -29,7 +29,8 @@ public class ProductDao {
     }
 
     public void insertProduct(Product product) {
-        var sql = "insert into product (id, name, price, url) values (?, ?, ?, ?)";
+        var sql = "insert into product (id, name, price, url) "
+            + "values (?, ?, ?, ?)";
         jdbcClient.sql(sql)
             .param(product.getId())
             .param(product.getName())
@@ -39,7 +40,9 @@ public class ProductDao {
     }
 
     public Product selectProduct(Long id) {
-        var sql = "select id, name, price, url from product where id = ?";
+        var sql = "select id, name, price, url "
+            + "from product "
+            + "where id = ?";
         return jdbcClient.sql(sql)
             .param(id)
             .query(resultSet -> {
@@ -56,7 +59,8 @@ public class ProductDao {
     }
 
     public List<Product> findAllProducts() {
-        var sql = "select id, name, price, url from product";
+        var sql = "select id, name, price, url "
+            + "from product";
         return jdbcClient.sql(sql)
             .query(resultSet -> {
                 List<Product> products = new ArrayList<>();
@@ -73,7 +77,9 @@ public class ProductDao {
     }
 
     public void updateProduct(Product product) {
-        var sql = "update product set name = ?, price = ?, url = ? where id = ?";
+        var sql = "update product "
+            + "set name = ?, price = ?, url = ? "
+            + "where id = ?";
         jdbcClient.sql(sql)
             .param(product.getName())
             .param(product.getPrice())
@@ -83,7 +89,8 @@ public class ProductDao {
     }
 
     public void deleteProduct(Long id) {
-        var sql = "delete from product where id = ?";
+        var sql = "delete from product "
+            + "where id = ?";
         jdbcClient.sql(sql)
             .param(id)
             .update();
