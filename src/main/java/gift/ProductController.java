@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/products")
 public class ProductController {
     private final ProductDAO productDAO;
 
@@ -20,7 +20,7 @@ public class ProductController {
         productDAO.createProductTable();
     }
 
-    @GetMapping("/products/{id}")
+    @GetMapping("/{id}")
     public ProductResponseDTO getProduct(@PathVariable Long id) {
         Product product = productDAO.selectProduct(id);
         if (product == null) {
@@ -34,7 +34,7 @@ public class ProductController {
         );
     }
 
-    @PostMapping("/products")
+    @PostMapping
     public ProductResponseDTO addProduct(@RequestBody ProductRequestDTO productRequestDTO) {
         Product newProduct = new Product(
             productRequestDTO.name(),
@@ -50,20 +50,20 @@ public class ProductController {
         );
     }
 
-    @PutMapping("/products/{id}")
+    @PutMapping("/{id}")
     public Long updateProduct(@PathVariable Long id, @RequestBody ProductRequestDTO productRequestDTO) {
         Product product = productDAO.selectProduct(id);
         if (product == null) {
             throw new IllegalArgumentException("유효하지 않은 상품입니다.");
         }
-        product.setName(productRequestDTO.name());
-        product.setPrice(productRequestDTO.price());
-        product.setUrl(productRequestDTO.url());
-        productDAO.updateProduct(product);
+//        product.setName(productRequestDTO.name());
+//        product.setPrice(productRequestDTO.price());
+//        product.setUrl(productRequestDTO.url());
+//        productDAO.updateProduct(product);
         return id;
     }
 
-    @DeleteMapping("/products/{id}")
+    @DeleteMapping("/{id}")
     public Long deleteProduct(@PathVariable Long id) {
         Product product = productDAO.selectProduct(id);
         if (product == null) {
@@ -74,7 +74,7 @@ public class ProductController {
     }
 
     // 모든 상품 조회
-    @GetMapping("/products")
+    @GetMapping
     public List<Product> getAllProducts() {
         return productDAO.findAllProducts();
     }
