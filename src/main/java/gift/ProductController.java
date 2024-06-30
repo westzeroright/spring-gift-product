@@ -1,6 +1,10 @@
 package gift;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,68 +17,80 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
-    private final ProductDAO productDAO;
+    private final ProductDao productDao;
 
-    public ProductController(ProductDAO productDAO) {
-        this.productDAO = productDAO;
-        productDAO.createProductTable();
+    public ProductController(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
+    @GetMapping
+    public List<ProductResponseDto> getAllProducts() {
+        List<Product> products = productDao.findAllProduct();
+
+        return products.stream()
+            .map(product -> new ProductResponseDto(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getUrl()
+            )).toList();
     }
 
     @GetMapping("/{id}")
-    public ProductResponseDTO getProduct(@PathVariable Long id) {
-        Product product = productDAO.selectProduct(id);
+    public ProductResponseDto getProduct(@PathVariable Long id) {
+        Optional<Product> product = productDao.findProductById(id);
         if (product == null) {
             throw new IllegalArgumentException("유효하지 않은 상품입니다");
         }
-        return new ProductResponseDTO(
+        return new ProductResponseDto(
+            product.get().getId(),
+            product.get().getName(),
+            product.get().getPrice(),
+            product.get().getUrl()
+        );
+    }
+
+    @PostMapping
+    public ProductResponseDto addProduct(@RequestBody ProductRequestDto productRequestDto) {
+        Product product = new Product(
+            productRequestDto.name(),
+            productRequestDto.price(),
+            productRequestDto.url()
+        );
+
+        productDao.addProduct(product);
+
+        return new ProductResponseDto(
             product.getId(),
             product.getName(),
             product.getPrice(),
             product.getUrl()
         );
     }
-
-    @PostMapping
-    public ProductResponseDTO addProduct(@RequestBody ProductRequestDTO productRequestDTO) {
-        Product newProduct = new Product(
-            productRequestDTO.name(),
-            productRequestDTO.price(),
-            productRequestDTO.url()
-        );
-        productDAO.insertProduct(newProduct);
-        return new ProductResponseDTO(
-            newProduct.getId(),
-            newProduct.getName(),
-            newProduct.getPrice(),
-            newProduct.getUrl()
-        );
-    }
-
     @PutMapping("/{id}")
-    public Long updateProduct(@PathVariable Long id, @RequestBody ProductRequestDTO productRequestDTO) {
-        Product product = productDAO.selectProduct(id);
-        if (product == null) {
-            throw new IllegalArgumentException("유효하지 않은 상품입니다.");
+    public ProductResponseDto updateProduct(@PathVariable Long id, @RequestBody ProductRequestDto productRequestDto) {
+        Optional<Product> product = productDao.findProductById(id);
+        if (product.isPresent()) {
+            productDao.updateProductById(id, productRequestDto);
+        } else {
+            throw new NoSuchElementException("유효하지 않은 상품입니다");
         }
-//        product.setName(productRequestDTO.name());
-//        product.setPrice(productRequestDTO.price());
-//        product.setUrl(productRequestDTO.url());
-//        productDAO.updateProduct(product);
-        return id;
-    }
 
+        return new ProductResponseDto(
+            product.get().getId(),
+            product.get().getName(),
+            product.get().getPrice(),
+            product.get().getUrl()
+        );
+    }
     @DeleteMapping("/{id}")
-    public Long deleteProduct(@PathVariable Long id) {
-        Product product = productDAO.selectProduct(id);
-        if (product == null) {
-            throw new IllegalArgumentException("유효하지 않은 상품입니다.");
+    public HttpEntity<String> deleteProduct(@PathVariable Long id) {
+        if (productDao.findProductById(id).isEmpty()) {
+            throw new NoSuchElementException("유효하지 않은 상품입니다.");
         }
-        productDAO.deleteProduct(id);
-        return id;
-    }
-
-    @GetMapping
-    public List<Product> getAllProducts() {
-        return productDAO.findAllProducts();
+        else {
+            productDao.deleteProductById(id);
+        }
+        return ResponseEntity.ok("성공적으로 삭제되었습니다");
     }
 }
