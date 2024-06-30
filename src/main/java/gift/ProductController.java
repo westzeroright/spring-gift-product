@@ -73,7 +73,6 @@ public class ProductController {
         return id;
     }
 
-    // 모든 상품 조회
     @GetMapping
     public List<Product> getAllProducts() {
         return productDAO.findAllProducts();
