@@ -1,5 +1,5 @@
 package gift;
 
-public record ProductResponseDTO(Long id, String name, int price, String url) {
+public record ProductResponseDto(Long id, String name, int price, String url) {
 
 }

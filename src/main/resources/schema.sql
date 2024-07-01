@@ -4,4 +4,4 @@ create table product(
     price int,
     url varchar(255),
     primary key(id)
-)
+);
